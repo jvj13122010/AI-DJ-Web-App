@@ -1,5 +1,9 @@
 sound = [];
 counter = 0;
+leftWristX = "";
+leftWristY = "";
+rightWristX = "";
+rightWristY = "";
 function preload(){
     sound.push(loadSound("SO69.mp3"));
     sound.push(loadSound("music.mp3"));
@@ -34,13 +38,16 @@ function pause(){
 
 function stopSound(){
     sound[counter].stop();
+    counter = 0;
 }
 
 function setup(){
-canvas = createCanvas(600,500);
-canvas.center();
-video = createCapture(VIDEO);
-video.hide();
+    canvas = createCanvas(600,500);
+    canvas.center();
+    video = createCapture(VIDEO);
+    video.hide();
+    poseNet = ml5.poseNet(video, modelLoaded);
+    poseNet.on('pose', gotPoses);
 }
 
 function draw(){
@@ -60,8 +67,40 @@ function prev(){
     sound[counter].stop();
     counter-=1;
     if (counter == -1) {
-        counter = 2;
+        counter = 0;
     }
     play();
 
 }
+function draw(){
+    image(video,0,0,600,500);
+    fill("red");
+    stroke("red");
+    circle(leftWristX,leftWristY,20);
+    circle(rightWristX,rightWristY,20);
+   tempLeftY= 500-leftWristY
+    volume = floor(Number(tempLeftY))/500;
+    document.getElementById("vol").innerHTML="Volume : " + volume;
+    sound.setVolume(volume);
+    // volume = floor(Number(WristY))/500;
+    // document.getElementById("volume").innerHTML="Volume : " + volume;
+    // sound.setVolume(volume);
+}
+
+function modelLoaded(){
+    console.log("model is loaded");
+}
+
+function gotPoses(results){
+    if (results.length > 0) {
+        console.log(results);
+        leftWristX = results[0].pose.leftWrist.x;
+        leftWristY = results[0].pose.leftWrist.y;
+        console.log("LeftX" + leftWristX);
+        console.log("LeftY" + leftWristY);
+        rightWristX = results[0].pose.rightWrist.x;
+        rightWristY = results[0].pose.rightWrist.y;
+        console.log("RightX" +rightWristX);
+        console.log("RightY" + rightWristY);
+
+    }}
